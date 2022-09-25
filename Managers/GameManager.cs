@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using Realms;
 using TMPro;
+using System;
 
 public class GameManager : Singleton<GameManager>
 {
     Realm realm;
-    [SerializeField] Unit playerUnit;
-    [SerializeField] Unit enemyUnit;
-    [SerializeField] List<Unit> unitList = new List<Unit>();
+    [SerializeField] Unit_Battle playerUnit;
+    [SerializeField] Unit_Battle enemyUnit;
+    [SerializeField] List<Unit_Battle> unitList = new List<Unit_Battle>();
 
     [SerializeField] TextMeshProUGUI playerUnitStatsText;
     [SerializeField] TextMeshProUGUI enemyUnitStatsText;
@@ -19,40 +20,42 @@ public class GameManager : Singleton<GameManager>
         player,
         enemy,
     }
-    Turn turn;
+    [SerializeField] Turn currentTurn;
+
+    [SerializeField] List<Turn> turnList = new List<Turn>();
 
     private void OnEnable()
     {
         realm = Realm.GetInstance();
         // Find unit from db or create new one
-        playerUnit = realm.Find<Unit>("123");
+        playerUnit = MapUnitRMToUnit(realm.Find<Unit>("123"));
         if (playerUnit == null)
         {
             realm.Write(() =>
             {
-                playerUnit = realm.Add(new Unit()
+                playerUnit = MapUnitRMToUnit(realm.Add(new Unit()
                 {
                     Id = "123",
                     Name = "Leif",
                     HitPoints = 10,
                     Attack = 1,
-                });
+                }));
             });
         }
         unitList.Add(playerUnit);
 
-        enemyUnit = realm.Find<Unit>("567");
+        enemyUnit =  MapUnitRMToUnit(realm.Find<Unit>("567"));
         if (enemyUnit == null)
         {
             realm.Write(() =>
             {
-                playerUnit = realm.Add(new Unit()
+                playerUnit = MapUnitRMToUnit(realm.Add(new Unit()
                 {
                     Id = "567",
                     Name = "Lilina",
                     HitPoints = 10,
                     Attack = 1,
-                });
+                }));
             });
         }
         unitList.Add(enemyUnit);
@@ -69,10 +72,13 @@ public class GameManager : Singleton<GameManager>
 
     void Start()
     {
+        turnList.Add(Turn.player);
+        turnList.Add(Turn.enemy);
+
         UpdateStatsUI(playerUnitStatsText, playerUnit);
         UpdateStatsUI(enemyUnitStatsText, enemyUnit);
 
-        turn = Turn.player; // Turn 1
+        currentTurn = Turn.player; // Turn 1
     }
 
     void Update()
@@ -80,50 +86,85 @@ public class GameManager : Singleton<GameManager>
         
     }
 
-    void UpdateStatsUI(TextMeshProUGUI ui, Unit unit)
+    void UpdateStatsUI(TextMeshProUGUI ui, Unit_Battle unit)
     {
         ui.text = 
             $"Name: {unit.Name}\n" +
-            $"HP: {unit.HitPoints}"; 
+            $"HP: {unit.HitPoints}\n" +
+            $"Atk: {unit.Attack}\n" +
+            $"Def: {unit.Defense}\n" +
+            $"Spd: {unit.Speed}"; 
     }
 
     public void PlayerAttacks()
     {
-        Attack(true, enemyUnit, playerUnit.Attack);
-        ChangeTurn();
+        Attack(enemyUnit, playerUnit.Attack);
     }
 
     public void EnemyAttacks()
     {
-        Attack(false, playerUnit, enemyUnit.Attack);
+        Attack(playerUnit, enemyUnit.Attack);
     }
 
-    public void Attack(bool isPlayerUnit, Unit targetedUnit, int damage)
+    public void Attack(Unit_Battle targetedUnit, int atk)
     {
-        targetedUnit.HitPoints += -(damage - targetedUnit.Defense);
-        if (isPlayerUnit)
-        {
-            UpdateStatsUI(playerUnitStatsText, targetedUnit);
-        } 
-        else
+        targetedUnit.HitPoints += -(atk - targetedUnit.Defense);
+        if (currentTurn == Turn.player)
         {
             UpdateStatsUI(enemyUnitStatsText, targetedUnit);
+        } 
+        else if (currentTurn == Turn.enemy)
+        {
+            UpdateStatsUI(playerUnitStatsText, targetedUnit);
         }
+
+        EndTurn();
     }
 
     void EnemyPhase()
     {
-        // Attacks player unit
-        EnemyAttacks();
+        EnemyAttacks(); // Attacks player unit
     }
+
+    void EndTurn()
+    {
+        // (Delay?)
+        ChangeTurn();
+    }
+
 
     void ChangeTurn()
     {
-        if (turn == Turn.player)
+        int index = turnList.FindIndex(t => t == currentTurn); // Find which index in the List the Turn is located
+        if (index + 1 < turnList.Count)
         {
-            turn = Turn.enemy;
-            EnemyPhase();
-            turn = Turn.player;
+            currentTurn = turnList[index + 1];
         }
+        else
+        {
+            currentTurn = turnList[0]; // Cycle back to beginning of List
+        }
+
+        // Enemy AI
+        if (currentTurn == Turn.enemy)
+        {
+            EnemyPhase();
+        }
+    }
+
+
+    Unit_Battle MapUnitRMToUnit(Unit rm)
+    {
+        Unit_Battle unit = new Unit_Battle()
+        {
+            Id = rm.Id,
+            Name = rm.Name,
+            HitPoints = rm.HitPoints,
+            Attack = rm.Attack,
+            Defense = rm.Defense,
+            Speed = rm.Speed,
+        };
+
+        return unit;
     }
 }
