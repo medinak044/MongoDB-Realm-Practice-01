@@ -15,4 +15,25 @@ public class MapperProfiles: Singleton<MapperProfiles>
         return unit;
     }
 
+    public Unit_Battle Map(Unit input, Unit_Battle output)
+    {
+        output = new Unit_Battle()
+        {
+            Id = input.Id,
+            Name = input.Name,
+            HitPoints = input.HitPoints,
+            Attack = input.Attack,
+            Defense = input.Defense,
+            Speed = input.Speed,
+        };
+
+        return output;
+    }
+   
 }
+
+//public interface IMapperProfiles
+//{
+//    void CreateMap<TSource, TDestination>();
+//    TDestination Map<TSource, TDestination>();
+//}

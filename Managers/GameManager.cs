@@ -34,35 +34,35 @@ public class GameManager : Singleton<GameManager>
 
         // Find unit from db or create new one
         playerUnit = MapUnitRMToUnit(realm.Find<Unit>("123"));
-        if (playerUnit == null)
-        {
-            realm.Write(() =>
-            {
-                playerUnit = MapUnitRMToUnit(realm.Add(new Unit()
-                {
-                    Id = "123",
-                    Name = "Leif",
-                    HitPoints = 10,
-                    Attack = 1,
-                }));
-            });
-        }
+        //if (playerUnit == null)
+        //{
+        //    realm.Write(() =>
+        //    {
+        //        playerUnit = MapUnitRMToUnit(realm.Add(new Unit()
+        //        {
+        //            Id = "123",
+        //            Name = "Leif",
+        //            HitPoints = 10,
+        //            Attack = 1,
+        //        }));
+        //    });
+        //}
         unitList.Add(playerUnit);
 
         enemyUnit =  MapUnitRMToUnit(realm.Find<Unit>("567"));
-        if (enemyUnit == null)
-        {
-            realm.Write(() =>
-            {
-                playerUnit = MapUnitRMToUnit(realm.Add(new Unit()
-                {
-                    Id = "567",
-                    Name = "Lilina",
-                    HitPoints = 10,
-                    Attack = 1,
-                }));
-            });
-        }
+        //if (enemyUnit == null)
+        //{
+        //    realm.Write(() =>
+        //    {
+        //        playerUnit = MapUnitRMToUnit(realm.Add(new Unit()
+        //        {
+        //            Id = "567",
+        //            Name = "Lilina",
+        //            HitPoints = 10,
+        //            Attack = 1,
+        //        }));
+        //    });
+        //}
         unitList.Add(enemyUnit);
 
         var all = new List<Unit>();
