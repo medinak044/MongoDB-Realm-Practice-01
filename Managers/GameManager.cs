@@ -4,10 +4,13 @@ using UnityEngine;
 using Realms;
 using TMPro;
 using System;
+using System.IO;
+using UnityEditor;
 
 public class GameManager : Singleton<GameManager>
 {
     Realm realm;
+
     [SerializeField] Unit_Battle playerUnit;
     [SerializeField] Unit_Battle enemyUnit;
     [SerializeField] List<Unit_Battle> unitList = new List<Unit_Battle>();
@@ -26,7 +29,9 @@ public class GameManager : Singleton<GameManager>
 
     private void OnEnable()
     {
-        realm = Realm.GetInstance();
+        string dbPath = $"{Application.dataPath}/Resources/Realm/FEO.realm"; // Dev environment vs Production environment
+        realm = Realm.GetInstance(dbPath);
+
         // Find unit from db or create new one
         playerUnit = MapUnitRMToUnit(realm.Find<Unit>("123"));
         if (playerUnit == null)
