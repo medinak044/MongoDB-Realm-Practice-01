@@ -9,9 +9,17 @@ public class GameManager : Singleton<GameManager>
     Realm realm;
     [SerializeField] Unit playerUnit;
     [SerializeField] Unit enemyUnit;
+    [SerializeField] List<Unit> unitList = new List<Unit>();
 
     [SerializeField] TextMeshProUGUI playerUnitStatsText;
     [SerializeField] TextMeshProUGUI enemyUnitStatsText;
+
+    enum Turn
+    {
+        player,
+        enemy,
+    }
+    Turn turn;
 
     private void OnEnable()
     {
@@ -31,9 +39,10 @@ public class GameManager : Singleton<GameManager>
                 });
             });
         }
+        unitList.Add(playerUnit);
 
-        playerUnit = realm.Find<Unit>("567");
-        if (playerUnit == null)
+        enemyUnit = realm.Find<Unit>("567");
+        if (enemyUnit == null)
         {
             realm.Write(() =>
             {
@@ -46,6 +55,11 @@ public class GameManager : Singleton<GameManager>
                 });
             });
         }
+        unitList.Add(enemyUnit);
+
+        var all = new List<Unit>();
+        all.AddRange(realm.All<Unit>()); // Find all units
+        Debug.Log(all.Count);
     }
 
     private void OnDisable()
@@ -58,6 +72,7 @@ public class GameManager : Singleton<GameManager>
         UpdateStatsUI(playerUnitStatsText, playerUnit);
         UpdateStatsUI(enemyUnitStatsText, enemyUnit);
 
+        turn = Turn.player; // Turn 1
     }
 
     void Update()
@@ -75,6 +90,7 @@ public class GameManager : Singleton<GameManager>
     public void PlayerAttacks()
     {
         Attack(true, enemyUnit, playerUnit.Attack);
+        ChangeTurn();
     }
 
     public void EnemyAttacks()
@@ -92,6 +108,22 @@ public class GameManager : Singleton<GameManager>
         else
         {
             UpdateStatsUI(enemyUnitStatsText, targetedUnit);
+        }
+    }
+
+    void EnemyPhase()
+    {
+        // Attacks player unit
+        EnemyAttacks();
+    }
+
+    void ChangeTurn()
+    {
+        if (turn == Turn.player)
+        {
+            turn = Turn.enemy;
+            EnemyPhase();
+            turn = Turn.player;
         }
     }
 }
