@@ -3,39 +3,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SeedData : Singleton<SeedData>
+public class SeedData
 {
-    MapperProfiles mp;
+    MapperProfiles mapper;
     Realm realm;
 
-    public SeedData(MapperProfiles mapperProfiles)
+    public SeedData(Realm realm, MapperProfiles mapperProfiles)
     {
-        this.mp = mapperProfiles;
-    }
-
-    private void Start()
-    {
-        string dbPath = $"{Application.dataPath}/Resources/Realm/FEO.realm"; // Dev environment vs Production environment
-        realm = Realm.GetInstance(dbPath);
+        this.realm = realm;
+        this.mapper = mapperProfiles;
     }
 
     public void InitiateSeedData()
     {
-        if (mp.MapUnitRMToUnit(realm.Find<Unit>("123")) == null)
+        if (realm.Find<Unit>("123") == null)
         {
             realm.Write(() =>
-            {
-                realm.Add(new Unit()
                 {
-                    Id = "123",
-                    Name = "Leif",
-                    HitPoints = 10,
-                    Attack = 1,
+                    realm.Add(new Unit()
+                    {
+                        Id = "123",
+                        Name = "Leif",
+                        HitPoints = 10,
+                        Attack = 1,
+                    });
                 });
-            });
         }
 
-        if (mp.MapUnitRMToUnit(realm.Find<Unit>("567")) == null)
+        if (realm.Find<Unit>("567") == null)
         {
             realm.Write(() =>
             {
@@ -49,5 +44,18 @@ public class SeedData : Singleton<SeedData>
             });
         }
 
+        if (realm.Find<Unit>("24601") == null)
+        {
+            realm.Write(() =>
+            {
+                realm.Add(new Unit()
+                {
+                    Id = "24601",
+                    Name = "Galzus",
+                    HitPoints = 30,
+                    Attack = 20,
+                });
+            });
+        }
     }
 }

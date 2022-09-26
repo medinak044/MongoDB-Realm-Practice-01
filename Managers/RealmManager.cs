@@ -5,7 +5,10 @@ using UnityEngine;
 
 public class RealmManager : PersistentSingleton<RealmManager>
 {
-    Realm realm;
+    public Realm realm;
+    public MapperProfiles mapper;
+
+    public SeedData seedData => new SeedData(realm, mapper);
 
     protected override void Awake()
     {
@@ -14,10 +17,16 @@ public class RealmManager : PersistentSingleton<RealmManager>
 
         string dbPath = $"{Application.dataPath}/Resources/Realm/FEO.realm"; // Dev environment vs Production environment
         realm = Realm.GetInstance(dbPath);
+        mapper = new MapperProfiles();
     }
 
     private void OnDisable()
     {
         if (realm != null) realm.Dispose();
+    }
+
+    private void Start()
+    {
+        seedData.InitiateSeedData();
     }
 }

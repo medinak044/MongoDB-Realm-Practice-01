@@ -1,4 +1,4 @@
-public class MapperProfiles: Singleton<MapperProfiles>
+public class MapperProfiles
 {
     public Unit_Battle MapUnitRMToUnit(Unit rm)
     {
@@ -29,7 +29,21 @@ public class MapperProfiles: Singleton<MapperProfiles>
 
         return output;
     }
-   
+
+    public Unit Map(Unit_Battle input, Unit output = null)
+    {
+        output = new Unit()
+        {
+            Id = input.Id,
+            Name = input.Name,
+            HitPoints = input.HitPoints,
+            Attack = input.Attack,
+            Defense = input.Defense,
+            Speed = input.Speed,
+        };
+
+        return output;
+    }
 }
 
 //public interface IMapperProfiles

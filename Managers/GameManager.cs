@@ -26,43 +26,18 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] Turn currentTurn;
 
     [SerializeField] List<Turn> turnList = new List<Turn>();
+    MapperProfiles mapper;
 
     private void OnEnable()
     {
-        string dbPath = $"{Application.dataPath}/Resources/Realm/FEO.realm"; // Dev environment vs Production environment
-        realm = Realm.GetInstance(dbPath);
+        realm = RealmManager.Instance.realm;
+        mapper = RealmManager.Instance.mapper;
 
         // Find unit from db or create new one
-        playerUnit = MapUnitRMToUnit(realm.Find<Unit>("123"));
-        //if (playerUnit == null)
-        //{
-        //    realm.Write(() =>
-        //    {
-        //        playerUnit = MapUnitRMToUnit(realm.Add(new Unit()
-        //        {
-        //            Id = "123",
-        //            Name = "Leif",
-        //            HitPoints = 10,
-        //            Attack = 1,
-        //        }));
-        //    });
-        //}
+        playerUnit = mapper.Map(realm.Find<Unit>("123"), new Unit_Battle());
         unitList.Add(playerUnit);
 
-        enemyUnit =  MapUnitRMToUnit(realm.Find<Unit>("567"));
-        //if (enemyUnit == null)
-        //{
-        //    realm.Write(() =>
-        //    {
-        //        playerUnit = MapUnitRMToUnit(realm.Add(new Unit()
-        //        {
-        //            Id = "567",
-        //            Name = "Lilina",
-        //            HitPoints = 10,
-        //            Attack = 1,
-        //        }));
-        //    });
-        //}
+        enemyUnit = mapper.Map(realm.Find<Unit>("567"), new Unit_Battle());
         unitList.Add(enemyUnit);
 
         var all = new List<Unit>();
@@ -157,19 +132,4 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-
-    Unit_Battle MapUnitRMToUnit(Unit rm)
-    {
-        Unit_Battle unit = new Unit_Battle()
-        {
-            Id = rm.Id,
-            Name = rm.Name,
-            HitPoints = rm.HitPoints,
-            Attack = rm.Attack,
-            Defense = rm.Defense,
-            Speed = rm.Speed,
-        };
-
-        return unit;
-    }
 }
